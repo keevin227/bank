@@ -1,0 +1,3 @@
+# Keep the editable deck and plaintext PDF local. Publish docs/ only.
+/presentation/
+__pycache__/

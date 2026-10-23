@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light">
+  <title>Bank Muscat — Private Presentation</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100svh;background:#f8f7f3;color:#222723;font-family:Arial,Helvetica,sans-serif;display:grid;place-items:center;padding:25px}main{width:min(450px,100%)}.mark{width:43px;height:3px;background:#c5322d;margin-bottom:33px}.eyebrow{font-size:10px;letter-spacing:2.2px;color:#c5322d;font-weight:600;margin-bottom:20px}h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:49px;letter-spacing:-2px;line-height:1.08;margin:0 0 20px}h1 em{color:#c5322d;font-weight:400}p{font-size:13px;line-height:1.7;color:#737570;margin:0 0 32px}label{display:block;font-size:11px;margin-bottom:10px}input{width:100%;border:1px solid #c9cdc1;background:#fffefb;border-radius:0;font-size:17px;padding:15px;color:#222723}button{border:0;background:#c5322d;color:#fffaf3;padding:16px 18px;font:13px Arial,Helvetica,sans-serif;width:100%;margin-top:13px;cursor:pointer;display:flex;justify-content:space-between}button:disabled{opacity:.65;cursor:wait}input:focus-visible,button:focus-visible{outline:3px solid #2d79ad;outline-offset:3px}#error{min-height:42px;color:#a62f29;font-size:12px;padding-top:14px;line-height:1.5}footer{border-top:1px solid #deded7;margin-top:21px;padding-top:21px;display:flex;justify-content:space-between;gap:15px;color:#797b73;font-size:9px;letter-spacing:1px}.no-script{font-size:12px;color:#a62f29;margin-top:15px}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark"></div><div class="eyebrow">BANK MUSCAT · LEADERSHIP PRESENTATION</div>
+    <h1>The next chapter<br>is <em>intelligent.</em></h1>
+    <p>A private presentation prepared by AI Integration SPC.<br>Enter your password to continue.</p>
+    <form id="unlock-form"><label for="password">Presentation password</label><input id="password" name="password" type="password" required autocomplete="current-password" autofocus><button id="unlock-button" type="submit"><span>Open presentation</span><span aria-hidden="true">→</span></button><div id="error" role="status" aria-live="polite"></div></form>
+    <footer><span>AI INTEGRATION SPC</span><span>MUSCAT, OMAN</span></footer>
+    <noscript><p class="no-script">JavaScript is required to decrypt this presentation.</p></noscript>
+  </main>
+  <script>
+    (()=>{
+      'use strict';
+      const form=document.querySelector('#unlock-form'),password=document.querySelector('#password'),button=document.querySelector('#unlock-button'),status=document.querySelector('#error');
+      const base=new URL('./',location.href);
+      async function getFile(name,json=false){const response=await fetch(new URL(name,base),{cache:'no-store'});if(!response.ok)throw new Error('load');return json?response.json():response.arrayBuffer();}
+      async function decrypt(buffer,key){const data=new Uint8Array(buffer);return crypto.subtle.decrypt({name:'AES-GCM',iv:data.slice(0,12)},key,data.slice(12));}
+      form.addEventListener('submit',async event=>{
+        event.preventDefault();if(button.disabled)return;
+        if(!globalThis.crypto?.subtle){status.textContent='A secure HTTPS connection and a modern browser are required.';return;}
+        button.disabled=true;status.textContent='Opening your presentation…';
+        let key,plain;
+        try{
+          const [manifest,encrypted]=await Promise.all([getFile('manifest.json',true),getFile('presentation.bin')]);
+          const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password.value),'PBKDF2',false,['deriveKey']);
+          key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:Uint8Array.from(atob(manifest.salt),c=>c.charCodeAt(0)),iterations:manifest.iterations,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['decrypt']);
+          plain=await decrypt(encrypted,key);
+        }catch(error){status.textContent=error.message==='load'?'The presentation could not be loaded. Please try again.':error.name==='OperationError'?'Incorrect password. Please try again.':'Unable to open the presentation. Please reload and try again.';button.disabled=false;password.focus();password.select();return;}
+        password.value='';
+        document.open();document.write(new TextDecoder().decode(plain));document.close();
+        document.querySelector('#lock-presentation').addEventListener('click',()=>location.reload());
+        document.querySelector('#download-pdf').addEventListener('click',async()=>{
+          const download=document.querySelector('#download-pdf');download.disabled=true;
+          try{const pdf=await decrypt(await getFile('handout.bin'),key);const url=URL.createObjectURL(new Blob([pdf],{type:'application/pdf'}));const a=document.createElement('a');a.href=url;a.download='Bank-Muscat-The-Intelligent-Bank.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch{alert('The PDF could not be downloaded. Please try again.');}finally{download.disabled=false;}
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
