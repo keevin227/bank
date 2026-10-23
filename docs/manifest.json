@@ -2,7 +2,7 @@
   "version": 1,
   "kdf": "PBKDF2-SHA-256",
   "iterations": 600000,
-  "salt": "wxC4yqf1tUKdR37/vpXOaQ==",
+  "salt": "GNDthmJOPOQXyNDov5/83g==",
   "cipher": "AES-256-GCM",
   "nonce_bytes": 12
 }

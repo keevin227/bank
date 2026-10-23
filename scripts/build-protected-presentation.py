@@ -25,8 +25,10 @@ def main():
     html = (SOURCE / 'index.html').read_text()
     css = (SOURCE / 'style.css').read_text()
     javascript = (SOURCE / 'presentation.js').read_text()
+    product_visuals = (SOURCE / 'valuegram-visuals.js').read_text()
     html = html.replace('<link rel="stylesheet" href="style.css">', '<style>' + css + '</style>')
     html = html.replace('<script defer src="presentation.js"></script>', '')
+    html = html.replace('<script defer src="valuegram-visuals.js"></script>', '')
 
     def inline_image(match):
         path = SOURCE / match.group(1)
@@ -35,7 +37,7 @@ def main():
 
     html = re.sub(r'src="(assets/[^\"]+)"', inline_image, html)
     html = html.replace('<button id="print"', '<button id="download-pdf" aria-label="Download PDF" title="Download PDF">↓</button><button id="lock-presentation" aria-label="Lock presentation" title="Lock presentation">⌂</button><button id="print"')
-    html = html.replace('</body>', '<script>' + javascript.replace('</script', '<\\/script') + '</script></body>')
+    html = html.replace('</body>', '<script>' + javascript.replace('</script', '<\\/script') + '</script><script>' + product_visuals.replace('</script', '<\\/script') + '</script></body>')
 
     salt = os.urandom(16)
     key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITERATIONS).derive(password.encode())
